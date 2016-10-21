@@ -18,7 +18,9 @@ public class Command {
 	private Set<String> aliases = new HashSet<>();
 	private boolean caseSensitive = false;
 	private boolean deleteCommand = false;
-	private EnumSet<Permissions> requiredPermissions = EnumSet.noneOf(Permissions.class);
+	private CommandCategory category;
+	private EnumSet<Permissions> userRequiredPermissions = EnumSet.noneOf(Permissions.class);
+	private EnumSet<Permissions> botRequiredPermissions = EnumSet.noneOf(Permissions.class);
 
 	Consumer<CommandContext> onExecuted = context -> {};
 	BiConsumer<CommandContext, FailureReason> onFailure = (context, failureReason) -> {};
@@ -58,6 +60,16 @@ public class Command {
 	 */
 	public Command withDescription(String description) {
 		this.description = description;
+		return this;
+	}
+
+	/**
+	 * An arbitrary value for the category of the command. This isn't used by the API.
+	 * @param category The category.
+	 * @return This command instance.
+	 */
+	public Command withCategory(CommandCategory category) {
+		this.category = category;
 		return this;
 	}
 
@@ -113,11 +125,21 @@ public class Command {
 
 	/**
 	 * The set of permissions a person requires to execute this command. Failing to meet these requirements will result in {@link FailureReason#AUTHOR_MISSING_PERMISSIONS}
-	 * @param requiredPermissions The required permissions.
+	 * @param userRequiredPermissions The required permissions.
 	 * @return This command instance.
 	 */
-	public Command requirePermissions(EnumSet<Permissions> requiredPermissions) {
-		this.requiredPermissions = requiredPermissions;
+	public Command userRequiredPermissions(EnumSet<Permissions> userRequiredPermissions) {
+		this.userRequiredPermissions = userRequiredPermissions;
+		return this;
+	}
+
+	/**
+	 * The set of permissions a person requires to execute this command. Failing to meet these requirements will result in {@link FailureReason#AUTHOR_MISSING_PERMISSIONS}
+	 * @param botRequiredPermissions The required permissions.
+	 * @return This command instance.
+	 */
+	public Command botRequiredPermissions(EnumSet<Permissions> botRequiredPermissions) {
+		this.botRequiredPermissions = botRequiredPermissions;
 		return this;
 	}
 
@@ -145,8 +167,12 @@ public class Command {
 		return deleteCommand;
 	}
 
-	public EnumSet<Permissions> getRequiredPermissions() {
-		return requiredPermissions;
+	public EnumSet<Permissions> getUserRequiredPermissions() {
+		return userRequiredPermissions;
+	}
+
+	public EnumSet<Permissions> getBotRequiredPermissions() {
+		return botRequiredPermissions;
 	}
 
 }
