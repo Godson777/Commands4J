@@ -26,7 +26,7 @@ public class Commands4J implements IModule {
 
 	@Override
 	public String getVersion() {
-		return "1.1.0";
+		return "1.1.0-MODDED";
 	}
 
 	@Override
