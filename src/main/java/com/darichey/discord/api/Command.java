@@ -155,6 +155,10 @@ public class Command {
 		return usage;
 	}
 
+	public CommandCategory getCategory() {
+		return category;
+	}
+
 	public Set<String> getAliases() {
 		return aliases;
 	}
