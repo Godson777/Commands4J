@@ -9,6 +9,7 @@ import sx.blah.discord.util.RequestBuffer;
 
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Random;
 
 class CommandDispatcher implements IListener<MessageReceivedEvent> {
 
@@ -28,31 +29,44 @@ class CommandDispatcher implements IListener<MessageReceivedEvent> {
 						return; // If it's case sensitive, check if the cases match
 
 					CommandContext context = new CommandContext(event.getMessage());
+					Random random = new Random();
+					int memeFailChance = random.nextInt(20);
 
 					EnumSet<Permissions> userRequiredPermissions = command.get().getUserRequiredPermissions();
 					EnumSet<Permissions> botRequiredPermissions = command.get().getBotRequiredPermissions();
 					boolean userHasPermission = event.getMessage().getChannel().getModifiedPermissions(event.getMessage().getAuthor()).containsAll(userRequiredPermissions);
 					boolean botHasPermission = event.getMessage().getChannel().getModifiedPermissions(event.getClient().getOurUser()).containsAll(botRequiredPermissions);
-					if (userHasPermission) {
-						if (botHasPermission) {
-							command.get().onExecuted.accept(context);
-							if (command.get().deletesCommand()) {
-								RequestBuffer.request(() -> {
-									try {
-										event.getMessage().delete();
-									} catch (MissingPermissionsException e) {
-										command.get().onFailure.accept(context, FailureReason.BOT_MISSING_PERMISSIONS);
-									} catch (DiscordException e) {
-										e.printStackTrace();
-									}
-								});
+					boolean memeFailed = memeFailChance == 19 && command.get().getCategory().equals(CommandCategory.MEME);
+					if (memeFailed) {
+						if (userHasPermission) {
+							if (botHasPermission) {
+								command.get().onExecuted.accept(context);
+								if (command.get().deletesCommand()) {
+									RequestBuffer.request(() -> {
+										try {
+											event.getMessage().delete();
+										} catch (MissingPermissionsException e) {
+											command.get().onFailure.accept(context, FailureReason.BOT_MISSING_PERMISSIONS);
+										} catch (DiscordException e) {
+											e.printStackTrace();
+										}
+									});
+								}
+							} else {
+								command.get().onFailure.accept(context, FailureReason.BOT_MISSING_DEFINED_PERMISSIONS);
 							}
 						} else {
-							command.get().onFailure.accept(context, FailureReason.BOT_MISSING_DEFINED_PERMISSIONS);
+							command.get().onFailure.accept(context, FailureReason.AUTHOR_MISSING_PERMISSIONS);
 						}
 					} else {
-						command.get().onFailure.accept(context, FailureReason.AUTHOR_MISSING_PERMISSIONS);
-					}
+					    RequestBuffer.request(() -> {
+					        try {
+					            event.getMessage().getChannel().sendMessage("no u");
+                            } catch (DiscordException | MissingPermissionsException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
 				}
 			}
 		}
