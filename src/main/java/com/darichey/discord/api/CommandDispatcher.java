@@ -25,49 +25,37 @@ class CommandDispatcher implements IListener<MessageReceivedEvent> {
 						: registry.getPrefix().length(), content.contains(" ") ? content.indexOf(" ") : content.length());
 				Optional<Command> command = registry.getCommandByName(commandName, true);
 				if (command.isPresent()) {
-					if (command.get().isCaseSensitive() && !commandName.equals(command.get().getName()))
-						return; // If it's case sensitive, check if the cases match
+                    if (command.get().isCaseSensitive() && !commandName.equals(command.get().getName()))
+                        return; // If it's case sensitive, check if the cases match
 
-					CommandContext context = new CommandContext(event.getMessage());
-					Random random = new Random();
-					int memeFailChance = random.nextInt(20);
+                    CommandContext context = new CommandContext(event.getMessage());
 
-					EnumSet<Permissions> userRequiredPermissions = command.get().getUserRequiredPermissions();
-					EnumSet<Permissions> botRequiredPermissions = command.get().getBotRequiredPermissions();
-					boolean userHasPermission = event.getMessage().getChannel().getModifiedPermissions(event.getMessage().getAuthor()).containsAll(userRequiredPermissions);
-					boolean botHasPermission = event.getMessage().getChannel().getModifiedPermissions(event.getClient().getOurUser()).containsAll(botRequiredPermissions);
-					boolean memeFailed = memeFailChance == 19 && command.get().getCategory().equals(CommandCategory.MEME);
-					if (!memeFailed) {
-						if (userHasPermission) {
-							if (botHasPermission) {
-								command.get().onExecuted.accept(context);
-								if (command.get().deletesCommand()) {
-									RequestBuffer.request(() -> {
-										try {
-											event.getMessage().delete();
-										} catch (MissingPermissionsException e) {
-											command.get().onFailure.accept(context, FailureReason.BOT_MISSING_PERMISSIONS);
-										} catch (DiscordException e) {
-											e.printStackTrace();
-										}
-									});
-								}
-							} else {
-								command.get().onFailure.accept(context, FailureReason.BOT_MISSING_DEFINED_PERMISSIONS);
-							}
-						} else {
-							command.get().onFailure.accept(context, FailureReason.AUTHOR_MISSING_PERMISSIONS);
-						}
-					} else {
-					    RequestBuffer.request(() -> {
-					        try {
-					            event.getMessage().getChannel().sendMessage("no u");
-                            } catch (DiscordException | MissingPermissionsException e) {
-                                e.printStackTrace();
+                    EnumSet<Permissions> userRequiredPermissions = command.get().getUserRequiredPermissions();
+                    EnumSet<Permissions> botRequiredPermissions = command.get().getBotRequiredPermissions();
+                    boolean userHasPermission = event.getMessage().getChannel().getModifiedPermissions(event.getMessage().getAuthor()).containsAll(userRequiredPermissions);
+                    boolean botHasPermission = event.getMessage().getChannel().getModifiedPermissions(event.getClient().getOurUser()).containsAll(botRequiredPermissions);
+
+                    if (userHasPermission) {
+                        if (botHasPermission) {
+                            command.get().onExecuted.accept(context);
+                            if (command.get().deletesCommand()) {
+                                RequestBuffer.request(() -> {
+                                    try {
+                                        event.getMessage().delete();
+                                    } catch (MissingPermissionsException e) {
+                                        command.get().onFailure.accept(context, FailureReason.BOT_MISSING_PERMISSIONS);
+                                    } catch (DiscordException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
                             }
-                        });
+                        } else {
+                            command.get().onFailure.accept(context, FailureReason.BOT_MISSING_DEFINED_PERMISSIONS);
+                        }
+                    } else {
+                        command.get().onFailure.accept(context, FailureReason.AUTHOR_MISSING_PERMISSIONS);
                     }
-				}
+                }
 			}
 		}
 	}
