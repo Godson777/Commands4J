@@ -37,7 +37,7 @@ class CommandDispatcher implements IListener<MessageReceivedEvent> {
 					boolean userHasPermission = event.getMessage().getChannel().getModifiedPermissions(event.getMessage().getAuthor()).containsAll(userRequiredPermissions);
 					boolean botHasPermission = event.getMessage().getChannel().getModifiedPermissions(event.getClient().getOurUser()).containsAll(botRequiredPermissions);
 					boolean memeFailed = memeFailChance == 19 && command.get().getCategory().equals(CommandCategory.MEME);
-					if (memeFailed) {
+					if (!memeFailed) {
 						if (userHasPermission) {
 							if (botHasPermission) {
 								command.get().onExecuted.accept(context);
