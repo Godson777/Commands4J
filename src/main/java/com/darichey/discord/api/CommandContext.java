@@ -65,7 +65,7 @@ public class CommandContext {
 		return this.registry;
 	}
 
-	public Channel getChannel() {
+	public TextChannel getTextChannel() {
 		return this.channel;
 	}
 

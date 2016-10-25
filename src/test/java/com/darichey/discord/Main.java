@@ -23,7 +23,7 @@ public class Main {
 			Command test = new Command("test")
 					.withAliases("tast", "trst")
 					.onExecuted(context ->
-						sendMessage(context.getMessage().getTextChannel(), "Pong!")
+						context.getTextChannel().sendMessage("Pong!")
 					);
 
 			CommandRegistry.getForClient(client).register(test);
@@ -31,9 +31,5 @@ public class Main {
 		} catch (LoginException | IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public static void sendMessage(TextChannel channel, String message) {
-		channel.sendMessage(message);
 	}
 }
