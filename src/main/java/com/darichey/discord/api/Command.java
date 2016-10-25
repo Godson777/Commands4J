@@ -1,11 +1,9 @@
 package com.darichey.discord.api;
 
-import sx.blah.discord.handle.obj.Permissions;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
+import net.dv8tion.jda.Permission;
+
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -19,8 +17,8 @@ public class Command {
 	private boolean caseSensitive = false;
 	private boolean deleteCommand = false;
 	private CommandCategory category;
-	private EnumSet<Permissions> userRequiredPermissions = EnumSet.noneOf(Permissions.class);
-	private EnumSet<Permissions> botRequiredPermissions = EnumSet.noneOf(Permissions.class);
+	private Permission[] userRequiredPermissions;
+	private Permission[] botRequiredPermissions;
 
 	Consumer<CommandContext> onExecuted = context -> {};
 	BiConsumer<CommandContext, FailureReason> onFailure = (context, failureReason) -> {};
@@ -128,7 +126,7 @@ public class Command {
 	 * @param userRequiredPermissions The required permissions.
 	 * @return This command instance.
 	 */
-	public Command userRequiredPermissions(EnumSet<Permissions> userRequiredPermissions) {
+	public Command userRequiredPermissions(Permission... userRequiredPermissions) {
 		this.userRequiredPermissions = userRequiredPermissions;
 		return this;
 	}
@@ -138,7 +136,7 @@ public class Command {
 	 * @param botRequiredPermissions The required permissions.
 	 * @return This command instance.
 	 */
-	public Command botRequiredPermissions(EnumSet<Permissions> botRequiredPermissions) {
+	public Command botRequiredPermissions(Permission... botRequiredPermissions) {
 		this.botRequiredPermissions = botRequiredPermissions;
 		return this;
 	}
@@ -171,11 +169,11 @@ public class Command {
 		return deleteCommand;
 	}
 
-	public EnumSet<Permissions> getUserRequiredPermissions() {
+	public Permission[] getUserRequiredPermissions() {
 		return userRequiredPermissions;
 	}
 
-	public EnumSet<Permissions> getBotRequiredPermissions() {
+	public Permission[] getBotRequiredPermissions() {
 		return botRequiredPermissions;
 	}
 
