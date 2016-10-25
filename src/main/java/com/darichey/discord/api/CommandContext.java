@@ -1,6 +1,9 @@
 package com.darichey.discord.api;
 
-import sx.blah.discord.handle.obj.IMessage;
+import net.dv8tion.jda.entities.Channel;
+import net.dv8tion.jda.entities.Guild;
+import net.dv8tion.jda.entities.TextChannel;
+import net.dv8tion.jda.events.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +15,19 @@ import java.util.regex.Pattern;
  */
 public class CommandContext {
 
-	private final IMessage message;
+	private final MessageReceivedEvent event;
 	private final String name;
 	private final String[] args;
 	private final CommandRegistry registry;
+	private final TextChannel channel;
+	private final Guild guild;
 
-	public CommandContext(IMessage message) {
-		this.registry = CommandRegistry.getForClient(message.getClient());
-		this.message = message;
-		final String content = message.getContent();
+	public CommandContext(MessageReceivedEvent event) {
+		this.registry = CommandRegistry.getForClient(event.getJDA());
+		this.event = event;
+		this.channel = event.getTextChannel();
+		this.guild = event.getGuild();
+		final String content = event.getMessage().getContent();
 		this.name = content.substring(registry.getPrefix().length()).substring(0, content.contains(" ") ? content.indexOf(" ") : content.length() - 1);
 		List<String> list = new ArrayList<>();
 		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(content.substring(registry.getPrefix().length() + name.length())); // Thanks @dec for regex
@@ -33,8 +40,8 @@ public class CommandContext {
 	/**
 	 * @return The message object.
 	 */
-	public IMessage getMessage() {
-		return this.message;
+	public MessageReceivedEvent getMessage() {
+		return this.event;
 	}
 
 	/**
@@ -56,5 +63,13 @@ public class CommandContext {
 	 */
 	public CommandRegistry getRegistry() {
 		return this.registry;
+	}
+
+	public Channel getChannel() {
+		return this.channel;
+	}
+
+	public Guild getGuild() {
+		return this.guild;
 	}
 }

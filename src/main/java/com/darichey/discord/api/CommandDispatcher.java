@@ -1,53 +1,50 @@
 package com.darichey.discord.api;
 
-import sx.blah.discord.api.events.IListener;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RequestBuffer;
+import net.dv8tion.jda.Permission;
+import net.dv8tion.jda.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.exceptions.PermissionException;
+import net.dv8tion.jda.hooks.ListenerAdapter;
+import net.dv8tion.jda.utils.PermissionUtil;
 
+import java.security.Permissions;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+import java.util.Set;
 
-class CommandDispatcher implements IListener<MessageReceivedEvent> {
+class CommandDispatcher extends ListenerAdapter {
 
-	@Override
-	public void handle(MessageReceivedEvent event) {
+    @Override
+	public void onMessageReceived(MessageReceivedEvent event) {
 		String content = event.getMessage().getContent();
-		CommandRegistry registry = CommandRegistry.getForClient(event.getClient());
-		boolean isUserDisabled = registry.isUserDisabledInGuild(event.getMessage().getGuild(), event.getMessage().getAuthor()) || registry.isUserDisabled(event.getMessage().getAuthor());
-		if (!event.getMessage().getChannel().isPrivate() && !event.getMessage().getAuthor().isBot() && !isUserDisabled) {
-			if (content.startsWith(registry.getPrefixForGuild(event.getMessage().getGuild()) == null ? registry.getPrefix() : registry.getPrefixForGuild(event.getMessage().getGuild()))) {
-				String commandName = content.substring(registry.getPrefixForGuild(event.getMessage().getGuild()) != null
-						? registry.getPrefixForGuild(event.getMessage().getGuild()).length()
+		CommandRegistry registry = CommandRegistry.getForClient(event.getJDA());
+		boolean isUserDisabled = registry.isUserDisabledInGuild(event.getGuild(), event.getMessage().getAuthor()) || registry.isUserDisabled(event.getMessage().getAuthor());
+		if (!event.isPrivate() && !event.getMessage().getAuthor().isBot() && !isUserDisabled) {
+			if (content.startsWith(registry.getPrefixForGuild(event.getGuild()) == null ? registry.getPrefix() : registry.getPrefixForGuild(event.getGuild()))) {
+				String commandName = content.substring(registry.getPrefixForGuild(event.getGuild()) != null
+						? registry.getPrefixForGuild(event.getGuild()).length()
 						: registry.getPrefix().length(), content.contains(" ") ? content.indexOf(" ") : content.length());
 				Optional<Command> command = registry.getCommandByName(commandName, true);
 				if (command.isPresent()) {
                     if (command.get().isCaseSensitive() && !commandName.equals(command.get().getName()))
                         return; // If it's case sensitive, check if the cases match
 
-                    CommandContext context = new CommandContext(event.getMessage());
+                    CommandContext context = new CommandContext(event);
 
-                    EnumSet<Permissions> userRequiredPermissions = command.get().getUserRequiredPermissions();
-                    EnumSet<Permissions> botRequiredPermissions = command.get().getBotRequiredPermissions();
-                    boolean userHasPermission = event.getMessage().getChannel().getModifiedPermissions(event.getMessage().getAuthor()).containsAll(userRequiredPermissions);
-                    boolean botHasPermission = event.getMessage().getChannel().getModifiedPermissions(event.getClient().getOurUser()).containsAll(botRequiredPermissions);
+                    Permission[] userRequiredPermissions = command.get().getUserRequiredPermissions();
+                    Permission[] botRequiredPermissions = command.get().getBotRequiredPermissions();
+                    boolean userHasPermission = (userRequiredPermissions == null || PermissionUtil.checkPermission(event.getTextChannel(), event.getAuthor(), userRequiredPermissions));
+                    boolean botHasPermission = (userRequiredPermissions == null || PermissionUtil.checkPermission(event.getTextChannel(), event.getJDA().getSelfInfo(), botRequiredPermissions));
 
                     if (userHasPermission) {
                         if (botHasPermission) {
                             command.get().onExecuted.accept(context);
                             if (command.get().deletesCommand()) {
-                                RequestBuffer.request(() -> {
-                                    try {
-                                        event.getMessage().delete();
-                                    } catch (MissingPermissionsException e) {
-                                        command.get().onFailure.accept(context, FailureReason.BOT_MISSING_PERMISSIONS);
-                                    } catch (DiscordException e) {
-                                        e.printStackTrace();
-                                    }
-                                });
+                                try {
+                                    event.getMessage().deleteMessage();
+                                } catch (PermissionException e) {
+                                    command.get().onFailure.accept(context, FailureReason.BOT_MISSING_PERMISSIONS);
+                                }
                             }
                         } else {
                             command.get().onFailure.accept(context, FailureReason.BOT_MISSING_DEFINED_PERMISSIONS);

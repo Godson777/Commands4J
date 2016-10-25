@@ -1,8 +1,8 @@
 package com.darichey.discord.api;
 
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
+import net.dv8tion.jda.JDA;
+import net.dv8tion.jda.entities.Guild;
+import net.dv8tion.jda.entities.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,30 +12,30 @@ import java.util.Optional;
 @SuppressWarnings("WeakerAccess")
 public class CommandRegistry {
 
-    private static HashMap<IDiscordClient, CommandRegistry> registries = new HashMap<>();
+    private static HashMap<JDA, CommandRegistry> registries = new HashMap<>();
     private List<Command> commands = new ArrayList<>();
-    private HashMap<IGuild, List<Command>> customCommands = new HashMap<>();
+    private HashMap<Guild, List<Command>> customCommands = new HashMap<>();
     private String prefix = "$";
-    private HashMap<IGuild, String> prefixes = new HashMap<>();
-    private HashMap<IGuild, List<IUser>> disabledUsersInGuilds = new HashMap<>();
-    private HashMap<IGuild, List<IUser>> testMode = new HashMap<>();
-    private List<IUser> disabledUsers = new ArrayList<>();
+    private HashMap<Guild, String> prefixes = new HashMap<>();
+    private HashMap<Guild, List<User>> disabledUsersInGuilds = new HashMap<>();
+    private HashMap<Guild, List<User>> testMode = new HashMap<>();
+    private List<User> disabledUsers = new ArrayList<>();
 
 	/**
 	 * Get the CommandRegistry associated with the client, or create a new one if not present.
 	 * @param client The client object to associate with.
 	 * @return The CommandRegistry for the client.
 	 */
-	public static CommandRegistry getForClient(IDiscordClient client) {
+	public static CommandRegistry getForClient(JDA client) {
 		if (!registries.containsKey(client)) {
 			registries.put(client, new CommandRegistry());
-			client.getDispatcher().registerListener(new CommandDispatcher());
+			client.addEventListener(new CommandDispatcher());
 		}
 		return registries.get(client);
 	}
 
 	/**
-	 * Private so you have to use {@link CommandRegistry#getForClient(IDiscordClient)}
+	 * Private so you have to use {@link CommandRegistry#getForClient(JDA)}
 	 */
 	private CommandRegistry() {}
 
@@ -56,7 +56,7 @@ public class CommandRegistry {
 	 * @param command The custom command.
 	 * @param guild The guild the command gets assigned to.
 	 */
-	public void customRegister(Command command, IGuild guild) {
+	public void customRegister(Command command, Guild guild) {
 		if (!customCommands.containsKey(guild)) {
 			customCommands.put(guild, new ArrayList<>());
 		}
@@ -97,7 +97,7 @@ public class CommandRegistry {
 	 * @param includeAlias If aliases can be used to search, otherwise it has to be the original name.
 	 * @return An optional value of the custom command.
 	 */
-	public Optional<Command> getCustomCommandByName(String name, IGuild guild, boolean includeAlias) {
+	public Optional<Command> getCustomCommandByName(String name, Guild guild, boolean includeAlias) {
 		if (customCommands.containsKey(guild))
 			return customCommands.get(guild).stream().filter(c -> c.getName().equalsIgnoreCase(name) || (includeAlias && c.getAliases().contains(name))).findFirst();
 		else return null;
@@ -116,7 +116,7 @@ public class CommandRegistry {
 	 * @param guild The guild the commands should be in.
 	 * @return A list of custom commands.
 	 */
-	public List<Command> getCustomCommands(IGuild guild) {
+	public List<Command> getCustomCommands(Guild guild) {
 		if (customCommands.containsKey(guild)) return customCommands.get(guild);
 		else return new ArrayList<>();
 	}
@@ -142,7 +142,7 @@ public class CommandRegistry {
 	 * @param guild The guild.
 	 * @param prefix The new prefix.
 	 */
-	public void setPrefixForGuild(IGuild guild, String prefix) {
+	public void setPrefixForGuild(Guild guild, String prefix) {
 		if (!prefixes.containsKey(guild)) {
 			prefixes.put(guild, prefix);
 		} else {
@@ -154,7 +154,7 @@ public class CommandRegistry {
 	 * Deletes the prefix in a specified guild, but only if the guild has a custom prefix.
 	 * @param guild The guild.
 	 */
-	public void deletePrefixForGuild(IGuild guild) {
+	public void deletePrefixForGuild(Guild guild) {
 		if (prefixes.containsKey(guild)) {
 			prefixes.remove(guild);
 		}
@@ -164,7 +164,7 @@ public class CommandRegistry {
 	 * @param guild The guild to get the prefix for.
 	 * @return The prefix that commands registered to this registry will be activated by in a specified guild.
 	 */
-	public String getPrefixForGuild(IGuild guild) {
+	public String getPrefixForGuild(Guild guild) {
 		if (prefixes.containsKey(guild)) {
 			return prefixes.get(guild);
 		} else {
@@ -177,12 +177,12 @@ public class CommandRegistry {
 	 * @param guild The guild.
 	 * @param user The user.
 	 */
-	public void disableUserInGuild(IGuild guild, IUser user) {
+	public void disableUserInGuild(Guild guild, User user) {
 		if (!disabledUsersInGuilds.containsKey(guild)) {
 			disabledUsersInGuilds.put(guild, new ArrayList<>());
 		}
 
-		List<IUser> users = disabledUsersInGuilds.get(guild);
+		List<User> users = disabledUsersInGuilds.get(guild);
 
 		if (!users.contains(user)) {
 			users.add(user);
@@ -197,9 +197,9 @@ public class CommandRegistry {
 	 * @param guild The guild.
 	 * @param user The user.
 	 */
-	public void enableUserInGuild(IGuild guild, IUser user) {
+	public void enableUserInGuild(Guild guild, User user) {
 		if (disabledUsersInGuilds.containsKey(guild)) {
-			List<IUser> users = disabledUsersInGuilds.get(guild);
+			List<User> users = disabledUsersInGuilds.get(guild);
 			if (users.contains(user)) {
 				users.remove(user);
 				disabledUsersInGuilds.replace(guild, users);
@@ -211,7 +211,7 @@ public class CommandRegistry {
 	 * Disables a user's ability to invoke commands globally.
 	 * @param user The user.
 	 */
-	public void disableUser(IUser user) {
+	public void disableUser(User user) {
 		if (!disabledUsers.contains(user)) {
 			disabledUsers.add(user);
 		} else {
@@ -223,7 +223,7 @@ public class CommandRegistry {
 	 * Enables a user's ability to invoke commands globally, does nothing if the user can already use commands.
 	 * @param user The user.
 	 */
-	public void enableUser(IUser user) {
+	public void enableUser(User user) {
 		if (!disabledUsers.contains(user)) {
 			disabledUsers.add(user);
 		} else {
@@ -237,8 +237,8 @@ public class CommandRegistry {
 	 * @param user The user.
 	 * @return false if user can invoke commands, true if not.
 	 */
-	public boolean isUserDisabledInGuild(IGuild guild, IUser user) {
-		List<IUser> users;
+	public boolean isUserDisabledInGuild(Guild guild, User user) {
+		List<User> users;
 		if (!disabledUsersInGuilds.containsKey(guild)) {
 			return false;
 		} else {
@@ -252,7 +252,7 @@ public class CommandRegistry {
 	 * @param user The user.
 	 * @return false if user can invoke commands, true if not.
 	 */
-	public boolean isUserDisabled(IUser user) {
+	public boolean isUserDisabled(User user) {
 		return disabledUsers.contains(user);
 	}
 }

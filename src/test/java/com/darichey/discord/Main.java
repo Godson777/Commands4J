@@ -2,44 +2,38 @@ package com.darichey.discord;
 
 import com.darichey.discord.api.Command;
 import com.darichey.discord.api.CommandRegistry;
-import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import net.dv8tion.jda.JDA;
+import net.dv8tion.jda.JDABuilder;
+import net.dv8tion.jda.entities.TextChannel;
 
+import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
 public class Main {
-	static IDiscordClient client;
+	static JDA client;
 	static String TOKEN = "";
 
 	public static void main(String[] args) {
-		try (BufferedReader reader = new BufferedReader(new FileReader("token.txt"))){
+		try (BufferedReader reader = new BufferedReader(new FileReader("token.txt"))) {
 			TOKEN = reader.readLine();
-			client = new ClientBuilder().withToken(TOKEN).login();
+			client = new JDABuilder().setBotToken(TOKEN).buildAsync();
 
 			Command test = new Command("test")
 					.withAliases("tast", "trst")
 					.onExecuted(context ->
-						sendMessage(context.getMessage().getChannel(), "Pong!")
+						sendMessage(context.getMessage().getTextChannel(), "Pong!")
 					);
 
 			CommandRegistry.getForClient(client).register(test);
 
-		} catch (IOException | DiscordException e) {
+		} catch (LoginException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void sendMessage(IChannel channel, String message) {
-		try {
-			channel.sendMessage(message);
-		} catch (MissingPermissionsException | DiscordException | RateLimitException e) {
-			e.printStackTrace();
-		}
+	public static void sendMessage(TextChannel channel, String message) {
+		channel.sendMessage(message);
 	}
 }
