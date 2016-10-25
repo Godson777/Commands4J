@@ -2,6 +2,7 @@ package com.darichey.discord.api;
 
 import net.dv8tion.jda.entities.Channel;
 import net.dv8tion.jda.entities.Guild;
+import net.dv8tion.jda.entities.Message;
 import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.message.MessageReceivedEvent;
 
@@ -16,6 +17,7 @@ import java.util.regex.Pattern;
 public class CommandContext {
 
 	private final MessageReceivedEvent event;
+	private final Message message;
 	private final String name;
 	private final String[] args;
 	private final CommandRegistry registry;
@@ -25,6 +27,7 @@ public class CommandContext {
 	public CommandContext(MessageReceivedEvent event) {
 		this.registry = CommandRegistry.getForClient(event.getJDA());
 		this.event = event;
+		this.message = event.getMessage();
 		this.channel = event.getTextChannel();
 		this.guild = event.getGuild();
 		final String content = event.getMessage().getContent();
@@ -40,8 +43,8 @@ public class CommandContext {
 	/**
 	 * @return The message object.
 	 */
-	public MessageReceivedEvent getMessage() {
-		return this.event;
+	public Message getMessage() {
+		return this.message;
 	}
 
 	/**
@@ -65,10 +68,16 @@ public class CommandContext {
 		return this.registry;
 	}
 
+	/**
+	 * @return The TextChannel of the message received.
+	 */
 	public TextChannel getTextChannel() {
 		return this.channel;
 	}
 
+	/**
+	 * @return The Guild of the message received.
+	 */
 	public Guild getGuild() {
 		return this.guild;
 	}
