@@ -1,9 +1,6 @@
 package com.darichey.discord.api;
 
-import net.dv8tion.jda.entities.Channel;
-import net.dv8tion.jda.entities.Guild;
-import net.dv8tion.jda.entities.Message;
-import net.dv8tion.jda.entities.TextChannel;
+import net.dv8tion.jda.entities.*;
 import net.dv8tion.jda.events.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
@@ -23,11 +20,13 @@ public class CommandContext {
 	private final CommandRegistry registry;
 	private final TextChannel channel;
 	private final Guild guild;
+	private final User author;
 
 	public CommandContext(MessageReceivedEvent event) {
 		this.registry = CommandRegistry.getForClient(event.getJDA());
 		this.event = event;
 		this.message = event.getMessage();
+		this.author = event.getAuthor();
 		this.channel = event.getTextChannel();
 		this.guild = event.getGuild();
 		final String content = event.getMessage().getContent();
@@ -69,16 +68,23 @@ public class CommandContext {
 	}
 
 	/**
-	 * @return The TextChannel of the message received.
+	 * @return The TextChannel of the message.
 	 */
 	public TextChannel getTextChannel() {
 		return this.channel;
 	}
 
 	/**
-	 * @return The Guild of the message received.
+	 * @return The Guild of the message.
 	 */
 	public Guild getGuild() {
 		return this.guild;
+	}
+
+	/**
+	 * @return The author of the message.
+	 */
+	public User getAuthor() {
+		return this.author;
 	}
 }
