@@ -18,7 +18,6 @@ public class CommandRegistry {
     private String prefix = "$";
     private HashMap<Guild, String> prefixes = new HashMap<>();
     private HashMap<Guild, List<User>> disabledUsersInGuilds = new HashMap<>();
-    private HashMap<Guild, List<User>> testMode = new HashMap<>();
     private List<User> disabledUsers = new ArrayList<>();
 
 	/**

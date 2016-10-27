@@ -29,7 +29,7 @@ public class CommandContext {
 		this.author = event.getAuthor();
 		this.channel = event.getTextChannel();
 		this.guild = event.getGuild();
-		final String content = event.getMessage().getContent();
+		final String content = event.getMessage().getRawContent();
 		this.name = content.substring(registry.getPrefix().length()).substring(0, content.contains(" ") ? content.indexOf(" ") : content.length() - 1);
 		List<String> list = new ArrayList<>();
 		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(content.substring(registry.getPrefix().length() + name.length())); // Thanks @dec for regex
