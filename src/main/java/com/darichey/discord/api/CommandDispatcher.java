@@ -34,7 +34,7 @@ class CommandDispatcher extends ListenerAdapter {
                     Permission[] userRequiredPermissions = command.get().getUserRequiredPermissions();
                     Permission[] botRequiredPermissions = command.get().getBotRequiredPermissions();
                     boolean userHasPermission = (userRequiredPermissions == null || PermissionUtil.checkPermission(event.getTextChannel(), event.getAuthor(), userRequiredPermissions));
-                    boolean botHasPermission = (userRequiredPermissions == null || PermissionUtil.checkPermission(event.getTextChannel(), event.getJDA().getSelfInfo(), botRequiredPermissions));
+                    boolean botHasPermission = (botRequiredPermissions == null || PermissionUtil.checkPermission(event.getTextChannel(), event.getJDA().getSelfInfo(), botRequiredPermissions));
 
                     if (userHasPermission) {
                         if (botHasPermission) {
