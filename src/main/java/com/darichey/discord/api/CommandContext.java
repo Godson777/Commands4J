@@ -1,5 +1,6 @@
 package com.darichey.discord.api;
 
+import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.entities.*;
 import net.dv8tion.jda.events.message.MessageReceivedEvent;
 
@@ -21,6 +22,7 @@ public class CommandContext {
 	private final TextChannel channel;
 	private final Guild guild;
 	private final User author;
+	private final JDA jda;
 
 	public CommandContext(MessageReceivedEvent event) {
 		this.registry = CommandRegistry.getForClient(event.getJDA());
@@ -29,6 +31,7 @@ public class CommandContext {
 		this.author = event.getAuthor();
 		this.channel = event.getTextChannel();
 		this.guild = event.getGuild();
+		this.jda = event.getJDA();
 		final String content = event.getMessage().getRawContent();
 		this.name = content.substring(registry.getPrefix().length()).substring(0, content.contains(" ") ? content.indexOf(" ") : content.length() - 1);
 		List<String> list = new ArrayList<>();
@@ -86,5 +89,12 @@ public class CommandContext {
 	 */
 	public User getAuthor() {
 		return this.author;
+	}
+
+	/**
+	 * @return The JDA the guild is located in.
+	 */
+	public JDA getJda() {
+		return this.jda;
 	}
 }
