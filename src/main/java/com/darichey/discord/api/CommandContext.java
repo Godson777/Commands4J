@@ -94,7 +94,7 @@ public class CommandContext {
 	/**
 	 * @return The JDA the guild is located in.
 	 */
-	public JDA getJda() {
+	public JDA getJDA() {
 		return this.jda;
 	}
 }
