@@ -2,7 +2,7 @@ package com.darichey.discord.api;
 
 public enum CommandCategory {
 
-    ADMIN("Administration"), MEME("Memes <Requires \"Living Meme\" role!>"), FUN("Fun"), GENERAL("General"), TEST("Test");
+    ADMIN("Administration"), MEME("Memes <Requires \"Living Meme\" role!>"), FUN("Fun"), GENERAL("General"), BOT_OWNER("Owner");
 
     private String name;
 
