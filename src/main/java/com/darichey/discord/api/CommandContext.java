@@ -22,6 +22,7 @@ public class CommandContext {
 	private final TextChannel channel;
 	private final Guild guild;
 	private final User author;
+	private final Member member;
 	private final JDA jda;
 
 	public CommandContext(MessageReceivedEvent event) {
@@ -29,6 +30,7 @@ public class CommandContext {
 		this.event = event;
 		this.message = event.getMessage();
 		this.author = event.getAuthor();
+		this.member = event.getMember();
 		this.channel = event.getTextChannel();
 		this.guild = event.getGuild();
 		this.jda = event.getJDA();
@@ -89,6 +91,13 @@ public class CommandContext {
 	 */
 	public User getAuthor() {
 		return this.author;
+	}
+
+	/**
+	 * @return The Member object of the author.
+	 */
+	public Member getMember() {
+		return this.member;
 	}
 
 	/**
