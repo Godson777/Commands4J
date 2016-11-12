@@ -1,8 +1,8 @@
 package com.darichey.discord.api;
 
-import net.dv8tion.jda.JDA;
-import net.dv8tion.jda.entities.*;
-import net.dv8tion.jda.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;

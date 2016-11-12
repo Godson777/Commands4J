@@ -1,16 +1,12 @@
 package com.darichey.discord.api;
 
-import net.dv8tion.jda.Permission;
-import net.dv8tion.jda.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.exceptions.PermissionException;
-import net.dv8tion.jda.hooks.ListenerAdapter;
-import net.dv8tion.jda.utils.PermissionUtil;
+import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.ChannelType;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.exceptions.PermissionException;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
-import java.security.Permissions;
-import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 class CommandDispatcher extends ListenerAdapter {
 
@@ -19,7 +15,7 @@ class CommandDispatcher extends ListenerAdapter {
 		String content = event.getMessage().getContent();
 		CommandRegistry registry = CommandRegistry.getForClient(event.getJDA());
 		boolean isUserDisabled = registry.isUserDisabledInGuild(event.getGuild(), event.getMessage().getAuthor()) || registry.isUserDisabled(event.getMessage().getAuthor());
-		if (!event.isPrivate() && !event.getMessage().getAuthor().isBot() && !isUserDisabled) {
+		if (!event.isFromType(ChannelType.PRIVATE) && !event.getMessage().getAuthor().isBot() && !isUserDisabled) {
 			if (content.startsWith(registry.getPrefixForGuild(event.getGuild()) == null ? registry.getPrefix() : registry.getPrefixForGuild(event.getGuild()))) {
 				String commandName = content.substring(registry.getPrefixForGuild(event.getGuild()) != null
 						? registry.getPrefixForGuild(event.getGuild()).length()
@@ -33,8 +29,8 @@ class CommandDispatcher extends ListenerAdapter {
 
                     Permission[] userRequiredPermissions = command.get().getUserRequiredPermissions();
                     Permission[] botRequiredPermissions = command.get().getBotRequiredPermissions();
-                    boolean userHasPermission = (userRequiredPermissions == null || PermissionUtil.checkPermission(event.getTextChannel(), event.getAuthor(), userRequiredPermissions));
-                    boolean botHasPermission = (botRequiredPermissions == null || PermissionUtil.checkPermission(event.getTextChannel(), event.getJDA().getSelfInfo(), botRequiredPermissions));
+                    boolean userHasPermission = (userRequiredPermissions == null || event.getMember().hasPermission(event.getTextChannel(), userRequiredPermissions));
+                    boolean botHasPermission = (botRequiredPermissions == null || event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), botRequiredPermissions));
 
                     if (userHasPermission) {
                         if (botHasPermission) {

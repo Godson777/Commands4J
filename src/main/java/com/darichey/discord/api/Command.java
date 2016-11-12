@@ -1,7 +1,7 @@
 package com.darichey.discord.api;
 
 
-import net.dv8tion.jda.Permission;
+import net.dv8tion.jda.core.Permission;
 
 import java.util.*;
 import java.util.function.BiConsumer;
