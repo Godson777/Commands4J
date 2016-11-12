@@ -2,9 +2,11 @@ package com.darichey.discord;
 
 import com.darichey.discord.api.Command;
 import com.darichey.discord.api.CommandRegistry;
-import net.dv8tion.jda.JDA;
-import net.dv8tion.jda.JDABuilder;
-import net.dv8tion.jda.entities.TextChannel;
+import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
 import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
@@ -18,7 +20,7 @@ public class Main {
 	public static void main(String[] args) {
 		try (BufferedReader reader = new BufferedReader(new FileReader("token.txt"))) {
 			TOKEN = reader.readLine();
-			client = new JDABuilder().setBotToken(TOKEN).buildAsync();
+			client = new JDABuilder(AccountType.BOT).setToken(TOKEN).buildAsync();
 
 			Command test = new Command("test")
 					.withAliases("tast", "trst")
@@ -28,7 +30,7 @@ public class Main {
 
 			CommandRegistry.getForClient(client).register(test);
 
-		} catch (LoginException | IOException e) {
+		} catch (LoginException | IOException | RateLimitedException e) {
 			e.printStackTrace();
 		}
 	}
