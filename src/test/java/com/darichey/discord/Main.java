@@ -5,8 +5,10 @@ import com.darichey.discord.api.CommandRegistry;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
@@ -25,10 +27,22 @@ public class Main {
 			Command test = new Command("test")
 					.withAliases("tast", "trst")
 					.onExecuted(context ->
-						context.getTextChannel().sendMessage("Pong!")
+						context.getTextChannel().sendMessage("Pong!").queue()
 					);
 
+			Command wew = new Command("wew")
+					.onExecuted(context -> context.getTextChannel().sendMessage("lad").queue());
+
 			CommandRegistry.getForClient(client).register(test);
+
+			client.addEventListener(new ListenerAdapter() {
+				@Override
+				public void onReady(ReadyEvent event) {
+					client.getGuilds().forEach(guild -> {
+						if (guild.getId().equals("221910104495095808")) CommandRegistry.getForClient(client).customRegister(wew, guild);
+					});
+				}
+			});
 
 		} catch (LoginException | IOException | RateLimitedException e) {
 			e.printStackTrace();

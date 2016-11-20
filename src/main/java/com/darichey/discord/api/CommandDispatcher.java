@@ -6,6 +6,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 
 class CommandDispatcher extends ListenerAdapter {
@@ -20,33 +21,37 @@ class CommandDispatcher extends ListenerAdapter {
 				String commandName = content.substring(registry.getPrefixForGuild(event.getGuild()) != null
 						? registry.getPrefixForGuild(event.getGuild()).length()
 						: registry.getPrefix().length(), content.contains(" ") ? content.indexOf(" ") : content.length());
-				Optional<Command> command = registry.getCommandByName(commandName, true);
-				if (command.isPresent()) {
-                    if (command.get().isCaseSensitive() && !commandName.equals(command.get().getName()))
+				Command command = null;
+                Optional<Command> standard = registry.getCommandByName(commandName, true);
+                Optional<Command> custom = registry.getCustomCommandByName(commandName, event.getGuild(), true);
+                if (standard.isPresent()) command = standard.get();
+                if (custom != null && custom.isPresent()) command = custom.get();
+				if (command != null) {
+                    if (command.isCaseSensitive() && !commandName.equals(command.getName()))
                         return; // If it's case sensitive, check if the cases match
 
                     CommandContext context = new CommandContext(event);
 
-                    Permission[] userRequiredPermissions = command.get().getUserRequiredPermissions();
-                    Permission[] botRequiredPermissions = command.get().getBotRequiredPermissions();
+                    Permission[] userRequiredPermissions = command.getUserRequiredPermissions();
+                    Permission[] botRequiredPermissions = command.getBotRequiredPermissions();
                     boolean userHasPermission = (userRequiredPermissions == null || event.getMember().hasPermission(event.getTextChannel(), userRequiredPermissions));
                     boolean botHasPermission = (botRequiredPermissions == null || event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), botRequiredPermissions));
 
                     if (userHasPermission) {
                         if (botHasPermission) {
-                            command.get().onExecuted.accept(context);
-                            if (command.get().deletesCommand()) {
+                            command.onExecuted.accept(context);
+                            if (command.deletesCommand()) {
                                 try {
                                     event.getMessage().deleteMessage().queue();
                                 } catch (PermissionException e) {
-                                    command.get().onFailure.accept(context, FailureReason.BOT_MISSING_PERMISSIONS);
+                                    command.onFailure.accept(context, FailureReason.BOT_MISSING_PERMISSIONS);
                                 }
                             }
                         } else {
-                            command.get().onFailure.accept(context, FailureReason.BOT_MISSING_DEFINED_PERMISSIONS);
+                            command.onFailure.accept(context, FailureReason.BOT_MISSING_DEFINED_PERMISSIONS);
                         }
                     } else {
-                        command.get().onFailure.accept(context, FailureReason.AUTHOR_MISSING_PERMISSIONS);
+                        command.onFailure.accept(context, FailureReason.AUTHOR_MISSING_PERMISSIONS);
                     }
                 }
 			}

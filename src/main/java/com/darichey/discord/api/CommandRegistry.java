@@ -99,7 +99,7 @@ public class CommandRegistry {
 	public Optional<Command> getCustomCommandByName(String name, Guild guild, boolean includeAlias) {
 		if (customCommands.containsKey(guild))
 			return customCommands.get(guild).stream().filter(c -> c.getName().equalsIgnoreCase(name) || (includeAlias && c.getAliases().contains(name))).findFirst();
-		else return null;
+        else return null;
 	}
 
 	/**
