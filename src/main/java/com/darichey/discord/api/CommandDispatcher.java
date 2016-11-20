@@ -37,7 +37,7 @@ class CommandDispatcher extends ListenerAdapter {
                             command.get().onExecuted.accept(context);
                             if (command.get().deletesCommand()) {
                                 try {
-                                    event.getMessage().deleteMessage();
+                                    event.getMessage().deleteMessage().queue();
                                 } catch (PermissionException e) {
                                     command.get().onFailure.accept(context, FailureReason.BOT_MISSING_PERMISSIONS);
                                 }
