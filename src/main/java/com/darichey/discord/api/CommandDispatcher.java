@@ -13,7 +13,7 @@ class CommandDispatcher extends ListenerAdapter {
 
     @Override
 	public void onMessageReceived(MessageReceivedEvent event) {
-		String content = event.getMessage().getContent();
+		String content = event.getMessage().getRawContent();
 		CommandRegistry registry = CommandRegistry.getForClient(event.getJDA());
 		boolean isUserDisabled = registry.isUserDisabledInGuild(event.getGuild(), event.getMessage().getAuthor()) || registry.isUserDisabled(event.getMessage().getAuthor());
 		if (!event.isFromType(ChannelType.PRIVATE) && !event.getMessage().getAuthor().isBot() && !isUserDisabled) {
