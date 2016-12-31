@@ -70,6 +70,25 @@ public class CommandRegistry {
 	}
 
 	/**
+	 * Unregister a custom command from a specific server.
+	 * @param commandName The custom command's name.
+	 * @param guild The guild the command gets removed from.
+	 */
+	public void customUnregister(String commandName, Guild guild) {
+		if (!customCommands.containsKey(guild)) {
+			customCommands.put(guild, new ArrayList<>());
+		}
+		Optional<Command> command = customCommands.get(guild).stream().filter(cmd -> cmd.getName().equalsIgnoreCase(commandName)).findFirst();
+		if (command.isPresent()) {
+			List<Command> cc = customCommands.get(guild);
+			cc.remove(command.get());
+			customCommands.replace(guild, cc);
+		} else {
+			throw new IllegalArgumentException("Attempted to unregister a command that doesn't appear to exist: " + commandName);
+		}
+	}
+
+	/**
 	 * Registers an array of commands. Purely for convenience.
 	 * @param commands Array/Varargs of commands to register
 	 */
